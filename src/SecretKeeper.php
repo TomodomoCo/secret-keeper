@@ -49,13 +49,18 @@ class SecretKeeper
 	public function load($secrets = [])
 	{
 		// Loop through the secrets
-		foreach ($secrets as $filename) {
+		foreach ($secrets as $config) {
+
+			// Work from a config array
+			$filename  = $config['filename'] ?? '';
+			$extension = $config['extension'] ?? '';
+			$prefix    = $config['prefix'] ?? $filename;
 
 			// Parse the files (all yaml for now)
-			$parsed_secrets = $this->parseSecretFile($filename, 'yml');
+			$parsedSecrets = $this->parseSecretFile($filename, $extension);
 
 			// Define the constants
-			$this->defineConstants($filename, $parsed_secrets);
+			$this->defineConstants($prefix, $parsedSecrets);
 		}
 
 		return;
@@ -64,39 +69,50 @@ class SecretKeeper
 	/**
 	 * Parse the secret file
 	 *
-	 * @param string $service
+	 * @param string $filename
 	 * @param string $extension
 	 * @return array
 	 */
-	private function parseSecretFile($filename = '', $extension = '')
+	private function parseSecretFile($filename, $extension)
 	{
+		// Fetch the secrets file
 		$file = $this->path . "{$filename}.{$extension}";
+		$file = file_exists($file) ? file_get_contents($file) : false;
 
-		if (file_exists($file) === false) {
-			return false;
+		// Return an empty array if necessary
+		if ($file === false) {
+			return [];
 		}
 
-		// Parse/decode different file types (JSON, YML, etc)
+		// Parse YAML
 		if ($extension === 'yml' || $extension === 'yaml') {
-			$parsed = $this->yaml->parse(file_get_contents($file));
+			$parsed = $this->yaml->parse($file);
 		}
 
+		// Parse JSON
+		if ($extension === 'json') {
+			$parsed = json_decode($file, true);
+		}
+
+		// Return the parsed file as an array
 		return $parsed;
 	}
 
 	/**
 	 * Define the constants from the parsed secrets
 	 *
-	 * @param string $filename
-	 * @param array $service
+	 * @param string $prefix
+	 * @param array $parsedSecrets
 	 * @return void
 	 */
-	private function defineConstants($filename = '', $parsed_secrets = [])
+	private function defineConstants($prefix, $parsedSecrets = [])
 	{
-		$items = $parsed_secrets[$this->stage] ?? $parsed_secrets;
+		// Grab a specific stage if it exists, or get the whole thing
+		$items = $parsedSecrets[$this->stage] ?? $parsedSecrets;
 
+		// Define the constatns with a specific prefix
 		foreach ($items as $name => $value) {
-			define(strtoupper("{$filename}_{$name}"), $value);
+			define(strtoupper("{$prefix}_{$name}"), $value);
 		}
 
 		return;

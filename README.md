@@ -33,17 +33,20 @@ use Tomodomo\SecretKeeper;
 $loader = new SecretKeeper('/absolute/path/to/secrets/', 'dev');
 
 $secrets = [
-	'database',
+	[
+		'filename'  => 'database',
+		'extension' => 'yml',
+	],
 ];
 
-$loader->load( $secrets );
+$loader->load($secrets);
 
 echo DATABASE_NAME; // mydevdatabase
 echo DATABASE_USER; // mydevdatabaseuser
 echo DATABASE_PASSWORD; // verylongandsecretstring
 ```
 
-If you prefer, you can omit the stages in your files and in the constructor:
+If you prefer, you can omit the stages in your files and in the constructor. You can also provide a custom prefix for your constants.
 
 ```yaml
 name: mydatabase
@@ -58,11 +61,19 @@ use Tomodomo\SecretKeeper;
 
 $loader = new SecretKeeper('/absolute/path/to/secrets/');
 
-$loader->load([ 'database' ]);
+$secrets = [
+	[
+		'filename'  => 'database',
+		'extension' => 'yml',
+		'prefix'    => 'db',
+	],
+];
 
-echo DATABASE_NAME; // mydatabase
-echo DATABASE_USER; // mydatabaseuser
-echo DATABASE_PASSWORD; // verylongandsecretstring
+$loader->load($secrets);
+
+echo DB_NAME; // mydatabase
+echo DB_USER; // mydatabaseuser
+echo DB_PASSWORD; // verylongandsecretstring
 ```
 
 ## About Tomodomo
