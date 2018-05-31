@@ -30,7 +30,7 @@ Load it like so:
 
 use Tomodomo\SecretKeeper;
 
-$loader = new SecretKeeper('/absolute/path/to/secrets', 'dev');
+$loader = new SecretKeeper('/absolute/path/to/secrets/', 'dev');
 
 $secrets = [
 	'database',
@@ -56,7 +56,7 @@ password: verylongandsecretstring
 
 use Tomodomo\SecretKeeper;
 
-$loader = new SecretKeeper('/absolute/path/to/secrets');
+$loader = new SecretKeeper('/absolute/path/to/secrets/');
 
 $loader->load([ 'database' ]);
 
