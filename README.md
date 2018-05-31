@@ -2,9 +2,68 @@
 
 Secret Keeper helps you load up various credential/secret files, typically YAML or JSON.
 
+(Only YAML is supported at the moment.)
+
 ## Usage
 
-Coming soon.
+Given the following YAML file, `database.yml`:
+
+```yaml
+dev:
+  name: mydevdatabase
+  user: mydevdatabaseuser
+  password: verylongandsecretstring
+staging:
+  name: mystagingdatabase
+  user: mystagingdatabaseuser
+  password: verylongandsecretstring
+production:
+  name: myproductiondatabase
+  user: myproductiondatabaseuser
+  password: verylongandsecretstring
+```
+
+Load it like so:
+
+```php
+<?php
+
+use Tomodomo\SecretKeeper;
+
+$loader = new SecretKeeper('/absolute/path/to/secrets', 'dev');
+
+$secrets = [
+	'database',
+];
+
+$loader->load( $secrets );
+
+echo DATABASE_NAME; // mydevdatabase
+echo DATABASE_USER; // mydevdatabaseuser
+echo DATABASE_PASSWORD; // verylongandsecretstring
+```
+
+If you prefer, you can omit the stages in your files and in the constructor:
+
+```yaml
+name: mydatabase
+user: mydatabaseuser
+password: verylongandsecretstring
+```
+
+```php
+<?php
+
+use Tomodomo\SecretKeeper;
+
+$loader = new SecretKeeper('/absolute/path/to/secrets');
+
+$loader->load([ 'database' ]);
+
+echo DATABASE_NAME; // mydatabase
+echo DATABASE_USER; // mydatabaseuser
+echo DATABASE_PASSWORD; // verylongandsecretstring
+```
 
 ## About Tomodomo
 
