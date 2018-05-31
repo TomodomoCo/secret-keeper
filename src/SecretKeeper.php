@@ -68,9 +68,9 @@ class SecretKeeper
 	 * @param string $extension
 	 * @return array
 	 */
-	private function parseSecretFile($service = '', $extension = '')
+	private function parseSecretFile($filename = '', $extension = '')
 	{
-		$file = $this->path . "{$service}.{$extension}";
+		$file = $this->path . "{$filename}.{$extension}";
 
 		if (file_exists($file) === false) {
 			return false;
@@ -85,15 +85,15 @@ class SecretKeeper
 	}
 
 	/**
-	 * Define the constants for the given $service
+	 * Define the constants from the parsed secrets
 	 *
 	 * @param string $filename
 	 * @param array $service
 	 * @return void
 	 */
-	private function defineConstants($filename = '', $service = [])
+	private function defineConstants($filename = '', $parsed_secrets = [])
 	{
-		$items = $service[$this->stage] ?? $service;
+		$items = $parsed_secrets[$this->stage] ?? $parsed_secrets;
 
 		foreach ($items as $name => $value) {
 			define(strtoupper("{$filename}_{$name}"), $value);
