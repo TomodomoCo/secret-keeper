@@ -73,7 +73,7 @@ class SecretKeeper
 	 * @param string $extension
 	 * @return array
 	 */
-	private function parseSecretFile($filename, $extension)
+	public function parseSecretFile($filename, $extension)
 	{
 		// Fetch the secrets file
 		$file = $this->path . "{$filename}.{$extension}";
