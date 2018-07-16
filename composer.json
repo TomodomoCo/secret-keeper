@@ -1,5 +1,5 @@
 {
-  "name": "tomodomo/secret-keeper",
+  "name": "tomodomoco/secret-keeper",
   "description": "Handle importing secrets from YAML and JSON as PHP constants",
   "type": "library",
   "license": "MIT",
@@ -14,6 +14,6 @@
     }
   ],
   "autoload": {
-    "psr-4": { "Tomodomo\\": "src/" }
+    "psr-4": { "TomodomoCo\\": "src/" }
   }
 }

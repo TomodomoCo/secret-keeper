@@ -28,7 +28,7 @@ Load it like so:
 ```php
 <?php
 
-use Tomodomo\SecretKeeper;
+use TomodomoCo\SecretKeeper;
 
 $loader = new SecretKeeper('/absolute/path/to/secrets/', 'dev');
 
@@ -57,7 +57,7 @@ password: verylongandsecretstring
 ```php
 <?php
 
-use Tomodomo\SecretKeeper;
+use TomodomoCo\SecretKeeper;
 
 $loader = new SecretKeeper('/absolute/path/to/secrets/');
 
@@ -78,7 +78,7 @@ echo DB_PASSWORD; // verylongandsecretstring
 
 ## About Tomodomo
 
-Tomodomo is a creative agency for communities. We focus on unique design and technical solutions to grow community activity and increase customer retention for online networking forums and customer service communities.
+Tomodomo is a creative agency for magazine publishers. We use custom design and technology to speed up your editorial workflow, engage your readers, and build sustainable subscription revenue for your business.
 
 Learn more at [tomodomo.co](https://tomodomo.co) or email us: [hello@tomodomo.co](mailto:hello@tomodomo.co)
 

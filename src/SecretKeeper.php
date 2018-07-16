@@ -1,6 +1,6 @@
 <?php
 
-namespace Tomodomo;
+namespace TomodomoCo;
 
 use Symfony\Component\Yaml;
 
