@@ -15,7 +15,7 @@ class SecretKeeper
 	public function __construct($path, $stage = '')
 	{
 		if (file_exists($path) === false) {
-			throw new Exception('This path does not exist.');
+			throw new \Exception('This path does not exist.');
 		}
 
 		// Set stage variables
@@ -52,9 +52,9 @@ class SecretKeeper
 		foreach ($secrets as $config) {
 
 			// Work from a config array
-			$filename  = $config['filename'] ?? '';
-			$extension = $config['extension'] ?? '';
-			$prefix    = $config['prefix'] ?? $filename;
+			$filename  = isset($config['filename']) ? $config['filename'] : '';
+			$extension = isset($config['extension']) ? $config['extension'] : '';
+			$prefix    = isset($config['prefix']) ? $config['prefix'] : $filename;
 
 			// Parse the files (all yaml for now)
 			$parsedSecrets = $this->parseSecretFile($filename, $extension);
@@ -108,7 +108,7 @@ class SecretKeeper
 	private function defineConstants($prefix, $parsedSecrets = [])
 	{
 		// Grab a specific stage if it exists, or get the whole thing
-		$items = $parsedSecrets[$this->stage] ?? $parsedSecrets;
+		$items = isset($parsedSecrets[$this->stage]) ? $parsedSecrets[$this->stage] : $parsedSecrets;
 
 		// Define the constatns with a specific prefix
 		foreach ($items as $name => $value) {
