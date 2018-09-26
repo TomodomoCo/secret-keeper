@@ -6,115 +6,159 @@ use Symfony\Component\Yaml;
 
 class SecretKeeper
 {
+    /**
+     * The base path for the parser to check
+     *
+     * @var string
+     */
+    private $path;
 
-	/**
-	 * Set up the parser(s) and path to secrets
-	 *
-	 * @return void
-	 */
-	public function __construct($path, $stage = '')
-	{
-		if (file_exists($path) === false) {
-			throw new \Exception('This path does not exist.');
-		}
+    /**
+     * The desired stage
+     *
+     * @var string
+     */
+    private $stage;
 
-		// Set stage variables
-		$this->path  = $path;
-		$this->stage = $stage;
+    /**
+     * Set up the parser(s) and path to secrets
+     *
+     * @return void
+     */
+    public function __construct(string $path)
+    {
+        if (file_exists($path) === false) {
+            throw new \Exception("Secret Keeper could not find the provided path: {$path}");
+        }
 
-		// Set up parsers
-		$this->setupParsers();
+        // Set stage variables
+        $this->path = $path;
 
-		return;
-	}
+        // Set up parsers
+        $this->setupParsers();
 
-	/**
-	 * Set up any necessary file parsers
-	 *
-	 * @return void
-	 */
-	private function setupParsers()
-	{
-		$this->yaml = new Yaml\Parser();
+        return;
+    }
 
-		return;
-	}
+    /**
+     * Set the stage for multi-stage secrets files
+     *
+     * @param string $stage The desired stage
+     *
+     * @return void
+     */
+    public function setStage(string $stage)
+    {
+        $this->stage = $stage;
 
-	/**
-	 * Parse the YAML and define constants
-	 *
-	 * @param array $secrets
-	 * @return void
-	 */
-	public function load($secrets = [])
-	{
-		// Loop through the secrets
-		foreach ($secrets as $config) {
+        return;
+    }
 
-			// Work from a config array
-			$filename  = isset($config['filename']) ? $config['filename'] : '';
-			$extension = isset($config['extension']) ? $config['extension'] : '';
-			$prefix    = isset($config['prefix']) ? $config['prefix'] : $filename;
+    /**
+     * Set up any necessary file parsers. In the future, this could
+     * be extendable to allow people to define their own parsers
+     *
+     * @return void
+     */
+    private function setupParsers()
+    {
+        $this->yaml = new Yaml\Parser();
 
-			// Parse the files (all yaml for now)
-			$parsedSecrets = $this->parseSecretFile($filename, $extension);
+        return;
+    }
 
-			// Define the constants
-			$this->defineConstants($prefix, $parsedSecrets);
-		}
+    /**
+     * Parse the YAML and define constants
+     *
+     * @param array $secrets The secrets to load
+     *
+     * @return void
+     */
+    public function load(array $secrets = [])
+    {
+        // Loop through the secrets
+        foreach ($secrets as $config) {
+            // Check for a valid file name
+            if (empty($config['file'] ?? '')) {
+                throw new \Exception('Secret Keeper could not get a file name for a defined secret.');
+            }
 
-		return;
-	}
+            // Check for a valid type
+            if (empty($config['type'] ?? '')) {
+                throw new \Exception('Secret Keeper could not get a file type for a defined secret.');
+            }
 
-	/**
-	 * Parse the secret file
-	 *
-	 * @param string $filename
-	 * @param string $extension
-	 * @return array
-	 */
-	public function parseSecretFile($filename, $extension)
-	{
-		// Fetch the secrets file
-		$file = $this->path . "{$filename}.{$extension}";
-		$file = file_exists($file) ? file_get_contents($file) : false;
+            // Check for a valid prefix
+            if (empty($config['prefix'] ?? '')) {
+                throw new \Exception('Secret Keeper could not get a prefix for a defined secret.');
+            }
 
-		// Return an empty array if necessary
-		if ($file === false) {
-			return [];
-		}
+            // Parse the files (all yaml for now)
+            $parsedSecrets = $this->parseSecretFile($config['file'], strtolower($config['type']));
 
-		// Parse YAML
-		if ($extension === 'yml' || $extension === 'yaml') {
-			$parsed = $this->yaml->parse($file);
-		}
+            // Define the constants
+            $this->defineConstants($parsedSecrets, $config['prefix']);
+        }
 
-		// Parse JSON
-		if ($extension === 'json') {
-			$parsed = json_decode($file, true);
-		}
+        return;
+    }
 
-		// Return the parsed file as an array
-		return $parsed;
-	}
+    /**
+     * Parse the secret file
+     *
+     * @param string $file File name to parse
+     * @param string $type Type of parser to use
+     *
+     * @return array
+     */
+    public function parseSecretFile(string $file, string $type)
+    {
+        // Fetch the secrets file
+        $filePath = $this->path . $file;
+        $contents = file_exists($filePath) ? file_get_contents($filePath) : false;
 
-	/**
-	 * Define the constants from the parsed secrets
-	 *
-	 * @param string $prefix
-	 * @param array $parsedSecrets
-	 * @return void
-	 */
-	private function defineConstants($prefix, $parsedSecrets = [])
-	{
-		// Grab a specific stage if it exists, or get the whole thing
-		$items = isset($parsedSecrets[$this->stage]) ? $parsedSecrets[$this->stage] : $parsedSecrets;
+        // Return an empty array if necessary
+        if ($contents === false) {
+            throw new \Exception("Secret Keeper could not find a file: {$filePath}");
+        }
 
-		// Define the constatns with a specific prefix
-		foreach ($items as $name => $value) {
-			define(strtoupper("{$prefix}_{$name}"), $value);
-		}
+        // Return an empty array if we couldn't parse the provided type
+        if (in_array($type, ['yml', 'yaml', 'json']) === false) {
+            throw new \Exception("Secret Keeper could not parse type `{$type}`");
+        }
 
-		return;
-	}
+        // Parse YAML/YML
+        if (in_array($type, ['yml', 'yaml'])) {
+            $parsed = $this->yaml->parse($contents);
+        }
+
+        // Parse JSON
+        if (in_array($type, ['json'])) {
+            $parsed = json_decode($contents, true);
+        }
+
+        // Return the parsed file as an array
+        return $parsed ?? [];
+    }
+
+    /**
+     * Define the constants from the parsed secrets
+     *
+     * @param array  $parsedSecrets The parsed secrets
+     * @param string $prefix        A prefix to apply to the constant
+     *
+     * @return void
+     */
+    private function defineConstants(array $parsedSecrets, string $prefix)
+    {
+        // Grab a specific stage if it exists, or get the whole thing
+        $items = $parsedSecrets[$this->stage] ?? $parsedSecrets;
+
+        // Define the constatns with a specific prefix
+        foreach ($items as $name => $value) {
+            define(strtoupper("{$prefix}_{$name}"), $value);
+        }
+
+        return;
+    }
 }

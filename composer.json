@@ -3,17 +3,19 @@
   "description": "Handle importing secrets from YAML and JSON as PHP constants",
   "type": "library",
   "license": "MIT",
+  "authors": [
+    {
+      "name": "Tomodomo",
+      "homepage": "https://tomodomo.co/",
+      "email": "hello@tomodomo.co"
+    }
+  ],
   "require": {
     "php": ">=7.0"
   },
-  "homepage": "https://tomodomo.co/",
-  "authors": [
-    {
-      "name": "Chris Van Patten",
-      "homepage": "http://www.chrisvanpatten.com/"
-    }
-  ],
   "autoload": {
-    "psr-4": { "Tomodomo\\": "src/" }
+    "psr-4": {
+      "Tomodomo\\": "src/"
+    }
   }
 }
